@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id                   Int          @id @default(autoincrement())
+  compound_id          String       @unique
+  user_id              Int
+  provider_type        String
+  provider_id          String
+  provider_account_id  String
+  refresh_token        String?
+  access_token         String?
+  access_token_expires DateTime?
+  created_at           DateTime     @default(now())
+  updated_at           DateTime     @default(now())
+  personalinfo         personalinfo @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "accounts_ibfk_1")
+
+  @@index([provider_account_id], map: "providerAccountId")
+  @@index([provider_id], map: "providerId")
+  @@index([user_id], map: "userId")
+}
+
+model addresses {
+  id           Int          @id @default(autoincrement())
+  pid          Int
+  address      String?      @db.VarChar(255)
+  contact_lg   Int?
+  contPhone    String?      @db.Char(18)
+  contEmail    String?      @db.VarChar(25)
+  createdAt    DateTime?    @default(now()) @db.DateTime(0)
+  modifiedAt   DateTime?    @default(now()) @db.DateTime(0)
+  personalinfo personalinfo @relation(fields: [pid], references: [id], onUpdate: Restrict, map: "addresses_ibfk_1")
+
+  @@index([pid], map: "pid")
+}
+
+model cities {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(30)
+  state_id Int
+}
+
+model comments {
+  id          Int      @id @default(autoincrement())
+  commentBody String   @db.VarChar(255)
+  username    String   @db.VarChar(255)
+  createdAt   DateTime @db.DateTime(0)
+  updatedAt   DateTime @db.DateTime(0)
+  PostId      Int?
+
+  @@index([PostId], map: "PostId")
+}
+
+model countries {
+  id        Int      @id @default(autoincrement())
+  sortname  String   @db.VarChar(3)
+  name      String   @db.VarChar(150)
+  phonecode Int
+  states    states[]
+}
+
+model courses {
+  id           Int         @id @default(autoincrement())
+  Programme    Int?        @db.TinyInt
+  Department   Int?        @db.TinyInt
+  Semester     String?     @db.VarChar(25)
+  Course_Code  String?     @db.VarChar(12)
+  Course_Title String?     @db.VarChar(255)
+  Lectures     Int
+  Text         Int
+  Practical    String?     @db.VarChar(2)
+  Credit_Unit  Int
+  Credit_Hours Int
+  Prerequisite String?     @db.VarChar(12)
+  Course_Type  String      @db.VarChar(15)
+  Level        Int         @db.SmallInt
+  department   department? @relation(fields: [Department], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "courses_ibfk_1")
+
+  @@index([Credit_Hours], map: "Credit_Hours_index")
+  @@index([Credit_Unit], map: "Credit_Unit_index")
+  @@index([Department], map: "Department")
+  @@index([Lectures], map: "Lectures_index")
+  @@index([Text], map: "Text_index")
+}
+
+model credentials {
+  id           Int          @id @default(autoincrement())
+  users_id     Int
+  image        String       @db.VarChar(150)
+  FileType     String?      @db.VarChar(15)
+  created      DateTime     @default(now()) @db.DateTime(0)
+  modified     DateTime     @default(now()) @db.DateTime(0)
+  personalinfo personalinfo @relation(fields: [users_id], references: [id], onUpdate: Restrict, map: "credentials_ibfk_1")
+
+  @@index([users_id], map: "users_id")
+}
+
+model department {
+  id        Int         @id @default(autoincrement()) @db.TinyInt
+  deptName  String?     @db.VarChar(50)
+  courses   courses[]
+  dept_prog dept_prog[]
+}
+
+model dept_prog {
+  id         Int        @id @default(autoincrement()) @db.SmallInt
+  dept_id    Int        @db.TinyInt
+  prog_id    Int        @db.TinyInt
+  department department @relation(fields: [dept_id], references: [id], onDelete: Cascade, map: "dept_prog_ibfk_1")
+  programme  programme  @relation(fields: [prog_id], references: [id], onDelete: Cascade, map: "dept_prog_ibfk_2")
+
+  @@index([dept_id], map: "dept_id")
+  @@index([prog_id], map: "prog_id")
+}
+
+model likes {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @db.DateTime(0)
+  updatedAt DateTime @db.DateTime(0)
+  PostId    Int?
+  UserId    Int?
+
+  @@index([PostId], map: "PostId")
+  @@index([UserId], map: "UserId")
+}
+
+model local {
+  id           Int            @id
+  country_id   Int
+  state        String?        @db.VarChar(12)
+  state_id     Int
+  id_1         Int
+  name         String?        @db.VarChar(25)
+  states       states         @relation(fields: [state_id], references: [id], onUpdate: Restrict, map: "local_ibfk_1")
+  personalinfo personalinfo[]
+
+  @@index([country_id], map: "country_id_index")
+  @@index([id_1], map: "id_1_index")
+  @@index([state_id], map: "new_state_id_index")
+}
+
+model payment {
+  id            Int           @id
+  txref         String        @db.Char(30)
+  transactionId String        @db.Char(20)
+  payer         String        @db.VarChar(50)
+  phoneNumber   String        @db.VarChar(50)
+  email         String        @db.Char(20)
+  currency      String        @db.Char(5)
+  amount        Int
+  users_id      Int?
+  ddate         DateTime      @default(now()) @db.DateTime(0)
+  paymentStatus String        @db.Char(11)
+  personalinfo  personalinfo? @relation(fields: [users_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "payment_ibfk_1")
+
+  @@index([users_id], map: "users_id")
+}
+
+model personalinfo {
+  id                     Int                 @id @default(autoincrement())
+  registrationNumber     String?             @unique(map: "registrationNumber") @db.Char(64)
+  surname                String?             @db.VarChar(50)
+  firstName              String?             @db.VarChar(50)
+  middleName             String?             @db.VarChar(50)
+  maidenName             String?             @db.VarChar(150)
+  dateOfBirth            DateTime?           @db.Date
+  sex                    String?             @db.Char(6)
+  maritalStatus          String?             @db.Char(10)
+  email                  String?             @unique(map: "pEmail")
+  mobileNumber           String?             @db.Char(20)
+  ctOfOrigin             String?             @db.VarChar(60)
+  lgaOfOrigin            Int?
+  createdAt              DateTime?           @default(now()) @db.DateTime(0)
+  modifiedAt             DateTime?           @default(now()) @db.DateTime(0)
+  programme              Int
+  courseOfStudy          Int
+  alternateCourseOfStudy Int
+  modeOfStudy            String              @db.VarChar(50)
+  local                  local?              @relation(fields: [lgaOfOrigin], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "personalinfo_ibfk_5")
+  accounts               accounts[]
+  addresses              addresses[]
+  credentials            credentials[]
+  payment                payment[]
+  post                   post[]
+  qualification          qualification[]
+  referee                referee[]
+  registeredcourses      registeredcourses[]
+  subjects               subjects[]
+
+  @@index([lgaOfOrigin], map: "lg_id")
+}
+
+model post {
+  id           Int           @id @default(autoincrement())
+  title        String
+  content      String?
+  published    Boolean       @default(false)
+  authorId     Int?
+  personalinfo personalinfo? @relation(fields: [authorId], references: [id], map: "Post_authorId_fkey")
+
+  @@index([authorId], map: "Post_authorId_fkey")
+}
+
+model programme {
+  id         Int         @id @default(autoincrement()) @db.TinyInt
+  prog_name  String?     @db.VarChar(12)
+  Department Int         @db.TinyInt
+  dept_prog  dept_prog[]
+
+  @@index([Department], map: "Department")
+}
+
+model qualification {
+  id                  Int          @id @default(autoincrement())
+  pid                 Int
+  institute           String       @db.VarChar(100)
+  yearGraduated       Int          @db.Year
+  certificateObtained String       @db.VarChar(50)
+  specialty           String       @db.VarChar(50)
+  scannedCert         String?      @db.VarChar(255)
+  personalinfo        personalinfo @relation(fields: [pid], references: [id], onUpdate: Restrict, map: "qualification_ibfk_1")
+
+  @@index([pid], map: "pid")
+}
+
+model referee {
+  id           Int          @id @default(autoincrement())
+  pid          Int
+  fullName     String       @db.VarChar(150)
+  org          String       @db.VarChar(50)
+  phone        String?      @db.Char(15)
+  email        String       @db.VarChar(30)
+  relationship String?      @db.VarChar(50)
+  createdAt    DateTime     @default(now()) @db.DateTime(0)
+  modifiedAt   DateTime     @default(now()) @db.DateTime(0)
+  personalinfo personalinfo @relation(fields: [pid], references: [id], onUpdate: Restrict, map: "referee_ibfk_1")
+
+  @@index([pid], map: "pid")
+}
+
+model registeredcourses {
+  id              Int          @id @default(autoincrement())
+  users_id        Int
+  level           Int
+  semester        String       @db.VarChar(50)
+  courseCode      String       @db.VarChar(6)
+  session         String       @db.VarChar(30)
+  assessmentScore Decimal?     @db.Decimal(10, 0)
+  examScore       Decimal?     @db.Decimal(10, 0)
+  alphagrade      String?      @db.VarChar(2)
+  gradePoint      Int?         @db.TinyInt
+  cgp             Int?
+  gradeClass      String?      @db.VarChar(20)
+  status          Int?         @db.TinyInt
+  remarks         String?      @db.VarChar(100)
+  course_id       Int
+  personalinfo    personalinfo @relation(fields: [users_id], references: [id], onUpdate: Restrict, map: "registeredcourses_ibfk_1")
+
+  @@index([courseCode], map: "course_code")
+  @@index([course_id], map: "course_id")
+  @@index([users_id], map: "users_id")
+}
+
+model roles {
+  id        Int      @id
+  name      String?  @db.VarChar(255)
+  createdAt DateTime @db.DateTime(0)
+  updatedAt DateTime @db.DateTime(0)
+}
+
+model schedules {
+  id      Int     @id @default(autoincrement()) @db.TinyInt
+  purpose String  @db.VarChar(100)
+  amount  Decimal @db.Decimal(10, 0)
+}
+
+model schools {
+  code       String @id @db.VarChar(6)
+  schoolName String @db.VarChar(50)
+}
+
+model sessions {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  expires       DateTime
+  session_token String   @unique
+  access_token  String   @unique
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now())
+}
+
+model states {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(30)
+  country_id Int       @default(1)
+  countries  countries @relation(fields: [country_id], references: [id], onUpdate: Restrict, map: "states_ibfk_1")
+  local      local[]
+
+  @@index([country_id], map: "country_id")
+}
+
+model subjects {
+  id           Int          @id @default(autoincrement())
+  pid          Int
+  subject      String       @db.VarChar(50)
+  grade        String       @db.VarChar(5)
+  examType     String       @db.VarChar(10)
+  personalinfo personalinfo @relation(fields: [pid], references: [id], onUpdate: Restrict, map: "subjects_ibfk_1")
+
+  @@index([pid], map: "pid")
+}
+
+model users {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique(map: "email")
+  password       String    @unique(map: "password") @db.VarChar(80)
+  mobileNumber   Int?
+  email_verified DateTime?
+  name           String?
+  image          String?
+  createdAt      DateTime? @default(now()) @db.DateTime(0)
+  modifiedAt     DateTime? @default(now()) @db.DateTime(0)
+
+  @@index([email_verified], map: "email_verified")
+}
+
+model verification_requests {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
