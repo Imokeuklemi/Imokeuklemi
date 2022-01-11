@@ -4,15 +4,13 @@ import {
   getSession,
 } from "@auth0/nextjs-auth0";
 import { PrismaClient } from "@prisma/client";
+import prisma from "../../../lib/prisma";
 
 export default withApiAuthRequired(async function PaymentResponse(req, res) {
   const { accessToken } = await getAccessToken(req, res);
   const { user } = getSession(req, res);
-  
-  console.log(user.formData);
 
   const { transaction_id } = req.query;
-  const prisma = new PrismaClient();
   // URL with transaction ID of which will be used to confirm transaction status
   const url = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
 
@@ -23,12 +21,13 @@ export default withApiAuthRequired(async function PaymentResponse(req, res) {
     },
   });
 
-  const verifiedTransaction = await response.json();
-  const { status, tx_ref, currency, amount, customer } =
-    verifiedTransaction.data;
+  const verified = await response.json();
+  const { status, tx_ref, currency, amount } = verified.data;
+  const { name, phone_number, email, id } = verified.data.customer;
 
-  const { name, phone_number, email, id } = customer;
-
+  const { purpose } = await prisma.schedules.findUnique({
+    where: { id: Number(req.query.purpose) },
+  });
 
   // check if customer exist in our database
   //const userExist = await prisma.users.findOne({ email: email });
@@ -49,7 +48,8 @@ export default withApiAuthRequired(async function PaymentResponse(req, res) {
     amount,
     name,
     phone_number,
-    email
+    email,
+    purpose
   );
 
   // await updateWallet(user._id, amount);
@@ -109,9 +109,9 @@ const createTransaction = async (
   amount,
   name,
   phone_number,
-  email
+  email,
+  purpose
 ) => {
-  const prisma = new PrismaClient();
   try {
     // create transaction
     const transaction = await prisma.payment.create({
@@ -125,6 +125,7 @@ const createTransaction = async (
         amount,
         currency,
         paymentStatus: status,
+        purpose,
       },
     });
     return transaction;

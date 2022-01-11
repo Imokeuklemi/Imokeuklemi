@@ -1,13 +1,17 @@
 import React from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
-import { v4 as uuid } from "uuid";
-import * as Yup from "yup";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
 
 import { PrismaClient } from "@prisma/client";
-function Secondary(props) {
+
+import {
+  withApiAuthRequired,
+  getAccessToken,
+  getSession,
+} from "@auth0/nextjs-auth0";
+
+export default withApiAuthRequired(function Secondary(props) {
   // const { data: session, status } = useSession();
 
   console.log(props);
@@ -66,13 +70,19 @@ function Secondary(props) {
           {fields.map((item, index) => {
             return (
               <div className="row" key={item.id}>
-                <input type="hidden" className="form-control" name="pid" value={pid}/>
+                <input
+                  type="hidden"
+                  className="form-control"
+                  name="pid"
+                  value={pid}
+                />
                 <label>Subject</label>
                 <select
                   className="form-select"
                   {...register(`ssce.${index}.subject`, {
                     required: true,
-                  })}>
+                  })}
+                >
                   <option selected value="">
                     Select Subject
                   </option>
@@ -117,7 +127,8 @@ function Secondary(props) {
                 <select
                   type="text"
                   className="form-control col-3"
-                  {...register(`ssce.${index}.grade`)}>
+                  {...register(`ssce.${index}.grade`)}
+                >
                   <option value="">select</option>
                   <option value="a1">A1</option>
                   <option value="b2">B2</option>
@@ -133,7 +144,8 @@ function Secondary(props) {
                 <select
                   as="select"
                   className="form-control col-3"
-                  {...register(`ssce.${index}.examType`)}>
+                  {...register(`ssce.${index}.examType`)}
+                >
                   <option value="">Select</option>
                   <option value="wase">WASE</option>
                   <option value="neco">NECO</option>
@@ -160,7 +172,8 @@ function Secondary(props) {
                 examType: "",
                 pid: pid,
               })
-            }>
+            }
+          >
             Add more Input
           </button>
         </section>
@@ -178,7 +191,7 @@ function Secondary(props) {
   //       </>
   //     );
   //   }
-}
+});
 
 export async function getServerSideProps({ query }) {
   const prisma = new PrismaClient();
@@ -201,5 +214,3 @@ export async function getServerSideProps({ query }) {
     }
   }
 }
-
-export default Secondary;

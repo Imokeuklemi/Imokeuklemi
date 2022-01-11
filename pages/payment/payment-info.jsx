@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useUser } from "@auth0/nextjs-auth0";
-import jsPDF from "jspdf";
 
-export default function PaymentForm() {
+export default function DetailsForm({ schedules }) {
   const router = useRouter();
   const user = useUser();
 
@@ -16,26 +15,54 @@ export default function PaymentForm() {
     formState: { errors },
   } = useForm();
 
-  const watchShowAge = watch("showAge", false);
-  const [amount, setAmount] = useState(0);
+  const watchpaidFor = watch("purpose", false);
+  const [dSchedule, setDSchedule] = useState({});
   const [programme, setProgramme] = useState();
-  const paidFor = register("showAge", { required: true });
+  const paidFor = register("purpose", { required: true });
+
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      // if (programme != "undefined" || programme != "") {
+      axios.get(`/api/schedules?sid=${programme}`).then((res) => {
+        setDSchedule(res.data);
+      });
+    } else {
+      isMounted.current = true;
+    }
+  }, [programme]);
+
+  // An effect to fetch the data
+  // Do something else with the data
+  // useEffect(() => {
+  //   if (isMounted.current) {
+  //     doSomething(data);
+  //   } else {
+  //     isMounted.current = true;
+  //   }
+  // }, [data]);
+
+  console.log("Programme" + programme);
+  console.log(dSchedule);
 
   return (
     <>
       <div className="card">
-        <button type="button" className="btn btn-primary">
-          Payment online<span className="badge bg-danger"></span>
+        <button
+          type="button"
+          className="btn btn-primary justify-content-center align-content-center"
+        >
+          Fast, Easy and secure<span className="badge bg-danger"></span>
         </button>
         <div className="card-header">
-          Fast and Easy Payment
           <form
             onSubmit={handleSubmit((data) =>
               router.push({ pathname: "/payment/payment-form", query: data })
             )}
           >
             <div>
-              <label className="form-label">Name in Full</label>
+              <label className="form-label">Name in Card</label>
               <input
                 className="form-control"
                 type="text"
@@ -63,8 +90,8 @@ export default function PaymentForm() {
                 placeholder="Mobile number"
                 {...register("phonenumber", {
                   required: true,
-                  minLength: 6,
-                  maxLength: 12,
+                  minLength: 11,
+                  maxLength: 15,
                 })}
               />
             </div>
@@ -73,25 +100,22 @@ export default function PaymentForm() {
               <select
                 onChange={(e) => {
                   setProgramme(e.target.value);
-                  setAmount(e.target.key);
-
                   paidFor.onChange(e);
                 }}
                 ref={paidFor.ref}
                 name={paidFor.name}
                 className="form-select"
-                // {...register("purpose", { required: true })}
               >
                 <option value="">Choose...</option>
                 {schedules.map((schedule) => (
-                  <option key={schedule.id} value={schedule.purpose}>
+                  <option key={schedule.id} value={schedule.id}>
                     {schedule.purpose}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              {programme === "Admission Form" && (
+              {dSchedule.purpose === "Admission Form" && (
                 <>
                   <label className="form-label">Programme Paying For</label>
                   <select
@@ -104,28 +128,31 @@ export default function PaymentForm() {
                     <option value="Degree">Degree</option>
                     <option value="PG">PG</option>
                   </select>
+
+                  <>
+                    <label className="form-label">Amount</label>
+                    <input
+                      className="form-control"
+                      type="number"
+                      {...register("amount", {})}
+                    />
+                  </>
                 </>
               )}
             </div>
             <div>
-              {watchpaidFor && (
-                <>
-                  {schedules
-                    .filter((schedule) => schedule.id === amount)
-                    .map((schedul) => (
-                      <>
-                        <label className="form-label">Amount</label>
-                        <input
-                          className="form-control"
-                          type="number"
-                          value={schedul.amount}
-                          disabled
-                          {...register("amount", {})}
-                        />
-                      </>
-                    ))}
-                </>
-              )}
+              {watchpaidFor &&
+                (dSchedule.purpose === "Admission Form" ? null : (
+                  <>
+                    <label className="form-label">Amount</label>
+                    <input
+                      className="form-control"
+                      type="number"
+                      value={dSchedule.amount}
+                      {...register("amount", {})}
+                    />
+                  </>
+                ))}
             </div>
 
             <button type="submit">Submit</button>
@@ -146,13 +173,4 @@ export default function PaymentForm() {
       </div>
     </>
   );
-}
-
-export async function getServerSideProps() {
-  const schedules = await prisma.schedules.findAll();
-  return {
-    props: {
-      schedules: JSON.parse(JSON.stringify(schedules)),
-    },
-  };
 }

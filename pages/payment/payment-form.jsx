@@ -5,7 +5,6 @@ import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
 
 export default withPageAuthRequired(function PaymentForm() {
   const router = useRouter();
-  const data = router.query;
 
   const handleFlutterPayment = useFlutterwave({
     public_key: "FLWPUBK_TEST-c7b632ad2ee96432a8b7b2c6161687bc-X",

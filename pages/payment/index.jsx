@@ -1,6 +1,7 @@
 import { Router, useRouter } from "next/router";
 import PaymentInfo from "../payment/payment-info";
 import PaymentVer from "../payment/verify-form";
+import prisma from "../../lib/prisma";
 
 
 import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
@@ -24,3 +25,14 @@ export default withPageAuthRequired(function Payment({schedules}) {
   );
 });
 
+
+export async function getServerSideProps() {
+  const schedules = await prisma.schedules.findMany();
+ // console.log(schedules);
+
+  return {
+    props: {
+      schedules: JSON.parse(JSON.stringify(schedules)),
+    },
+  };
+}

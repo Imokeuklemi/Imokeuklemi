@@ -155,9 +155,8 @@ model payment {
   currency      String        @db.Char(5)
   amount        Int
   users_id      Int?
-  ddate         DateTime      @default(now()) @db.DateTime(0)
   paymentStatus String        @db.Char(11)
-  payFor        String        @db.VarChar(50)
+  purpose       String        @db.VarChar(50)
   personalinfo  personalinfo? @relation(fields: [users_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "payment_ibfk_1")
 
   @@index([users_id], map: "users_id")

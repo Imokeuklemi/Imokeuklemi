@@ -5,35 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "firefox",
+      "name": "Launch Edge",
       "request": "launch",
-      "reAttach": true,
-      "name": "Launch index.html",
-      "file": "${workspaceFolder}/index.html"
-    },
-    {
-      "type": "firefox",
-      "request": "attach",
-      "name": "Attach"
-    },
-    {
-      "name": "Attach to Edge",
-      "port": 3000,
-      "request": "attach",
       "type": "pwa-msedge",
+      "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
-    },
-    {
-      "type": "firefox",
-      "request": "launch",
-      "reAttach": true,
-      "name": "Launch add-on",
-      "addonPath": "${workspaceFolder}"
-    },
-    {
-      "type": "firefox",
-      "request": "attach",
-      "name": "Attach firfox"
     },
     {
       "name": "Next.js: debug server-side",
