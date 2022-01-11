@@ -6,11 +6,11 @@ import {
   closePaymentModal,
 } from "flutterwave-react-v3";
 
-export default async function Handler(req, res) {
+export default withApiAuthRequired(async function Handler(req, res) {
   const { user } = getSession(req, res);
-  const flw = useFlutterwave();
 
   const prisma = new PrismaClient();
+  console.log(req.query)
   if (req.method === "POST") {
     try {
       const paymentCallback = await prisma.payment
@@ -43,4 +43,4 @@ export default async function Handler(req, res) {
       res.send(error);
     }
   }
-}
+});

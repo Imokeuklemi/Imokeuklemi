@@ -4,7 +4,7 @@ import prisma from "../../lib/prisma";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
-import Loading from "../../lib/loading";
+import Loading from "../../lib/Loading";
 import Axios from "axios";
 import * as yup from "yup";
 

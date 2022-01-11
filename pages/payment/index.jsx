@@ -1,12 +1,14 @@
-import { useRouter } from "next/router";
+import { Router, useRouter } from "next/router";
 import PaymentInfo from "../payment/payment-info";
 import PaymentVer from "../payment/verify-form";
 
+
 import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
 
-export default withPageAuthRequired(function Payment({ user }) {
-  const { error, isLoading } = useUser();
+export default withPageAuthRequired(function Payment({schedules}) {
+  const { user, error, isLoading } = useUser();
   const router = useRouter();
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
 
@@ -16,8 +18,9 @@ export default withPageAuthRequired(function Payment({ user }) {
         <PaymentVer />
       </div>
       <div className="col-md-6">
-        <PaymentInfo />
+        <PaymentInfo schedules={schedules}  />
       </div>
     </div>
   );
 });
+

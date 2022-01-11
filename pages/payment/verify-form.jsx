@@ -13,7 +13,7 @@ export default function Verifier() {
   } = useForm();
 
   const onSubmit = async (data) => {
-    Axios.get(`/api/admin/verify-payment?id=${data.id}`).then((response) => {
+    Axios.get(`/api/payment/payment-response?transaction_id=${data.transaction_id}`).then((response) => {
       if (response.data.error) {
         console.log(response.data);
       }
@@ -34,7 +34,7 @@ export default function Verifier() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <input
               className="form-control"
-              {...register("id", { required: true })}
+              {...register("transaction_id", { required: true })}
             />
             <div className="input-group mt-2">
               <button type="submit" className="btn btn-success btn-lg">

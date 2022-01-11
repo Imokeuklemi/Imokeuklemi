@@ -8,6 +8,8 @@ import { PrismaClient } from "@prisma/client";
 export default withApiAuthRequired(async function PaymentResponse(req, res) {
   const { accessToken } = await getAccessToken(req, res);
   const { user } = getSession(req, res);
+  
+  console.log(user.formData);
 
   const { transaction_id } = req.query;
   const prisma = new PrismaClient();
@@ -26,6 +28,7 @@ export default withApiAuthRequired(async function PaymentResponse(req, res) {
     verifiedTransaction.data;
 
   const { name, phone_number, email, id } = customer;
+
 
   // check if customer exist in our database
   //const userExist = await prisma.users.findOne({ email: email });

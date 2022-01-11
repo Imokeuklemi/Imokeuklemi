@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "Export": "next export"
   },
   "browserslist": [
     ">0.2%",
@@ -40,7 +41,6 @@
     "react-datasheet": "^1.4.9",
     "react-dom": "17.0.2",
     "react-hook-form": "^7.22.5",
-    "react-hooks-helper": "^1.5.0-alpha.1",
     "react-pdf": "^5.6.0",
     "react-player": "^2.9.0",
     "stream-browserify": "^3.0.0",
